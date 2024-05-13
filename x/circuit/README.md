@@ -1,203 +1,112 @@
-# `x/circuit`
+# RISC Zero Rust Starter Template
 
-## Concepts
+Welcome to the RISC Zero Rust Starter Template! This template is intended to
+give you a starting point for building a project using the RISC Zero zkVM.
+Throughout the template (including in this README), you'll find comments
+labelled `TODO` in places where you'll need to make changes. To better
+understand the concepts behind this template, check out the [zkVM
+Overview][zkvm-overview].
 
-Circuit Breaker is a module that is meant to avoid a chain needing to halt/shut down in the presence of a vulnerability, instead the module will allow specific messages or all messages to be disabled. When operating a chain, if it is app specific then a halt of the chain is less detrimental, but if there are applications built on top of the chain then halting is expensive due to the disturbance to applications. 
+## Quick Start
 
-## How it works
+First, make sure [rustup] is installed. The
+[`rust-toolchain.toml`][rust-toolchain] file will be used by `cargo` to
+automatically install the correct version.
 
-Circuit Breaker works with the idea that an address or set of addresses have the right to block messages from being executed and/or included in the mempool. Any address with a permission is able to reset the circuit breaker for the message. 
+To build all methods and execute the method within the zkVM, run the following
+command:
 
-The transactions are checked and can be rejected at two points:
-
-* In `CircuitBreakerDecorator` [ante handler](https://docs.cosmos.network/main/learn/advanced/baseapp#antehandler):
-
-```go reference
-https://github.com/cosmos/cosmos-sdk/blob/x/circuit/v0.1.0/x/circuit/ante/circuit.go#L27-L41
-``` 
-
-* With a [message router check](https://docs.cosmos.network/main/learn/advanced/baseapp#msg-service-router):
-
-```go reference
-https://github.com/cosmos/cosmos-sdk/blob/v0.50.1/baseapp/msg_service_router.go#L104-L115
-``` 
-
-:::note
-The `CircuitBreakerDecorator` works for most use cases, but [does not check the inner messages of a transaction](https://docs.cosmos.network/main/learn/beginner/tx-lifecycle#antehandler). This some transactions (such as `x/authz` transactions or some `x/gov` transactions) may pass the ante handler. **This does not affect the circuit breaker** as the message router check will still fail the transaction.
-This tradeoff is to avoid introducing more dependencies in the `x/circuit` module. Chains can re-define the `CircuitBreakerDecorator` to check for inner messages if they wish to do so.
-:::
-
-## State
-
-### Accounts
-
-* AccountPermissions `0x1 | account_address  -> ProtocolBuffer(CircuitBreakerPermissions)`
-
-```go
-type level int32
-
-const (
-    // LEVEL_NONE_UNSPECIFIED indicates that the account will have no circuit
-    // breaker permissions.
-    LEVEL_NONE_UNSPECIFIED = iota
-    // LEVEL_SOME_MSGS indicates that the account will have permission to
-    // trip or reset the circuit breaker for some Msg type URLs. If this level
-    // is chosen, a non-empty list of Msg type URLs must be provided in
-    // limit_type_urls.
-    LEVEL_SOME_MSGS
-    // LEVEL_ALL_MSGS indicates that the account can trip or reset the circuit
-    // breaker for Msg's of all type URLs.
-    LEVEL_ALL_MSGS 
-    // LEVEL_SUPER_ADMIN indicates that the account can take all circuit breaker
-    // actions and can grant permissions to other accounts.
-    LEVEL_SUPER_ADMIN
-)
-
-type Access struct {
-	level int32 
-	msgs []string // if full permission, msgs can be empty
-}
+```bash
+cargo run
 ```
 
-### Disable List
+This is an empty template, and so there is no expected output (until you modify
+the code).
 
-List of type urls that are disabled.
+### Executing the project locally in development mode
 
-* DisableList `0x2 | msg_type_url -> []byte{}` <!--- should this be stored in json to skip encoding and decoding each block, does it matter?-->
+During development, faster iteration upon code changes can be achieved by leveraging [dev-mode], we strongly suggest activating it during your early development phase. Furthermore, you might want to get insights into the execution statistics of your project, and this can be achieved by specifying the environment variable `RUST_LOG="[executor]=info"` before running your project.
 
-## State Transitions
+Put together, the command to run your project in development mode while getting execution statistics is:
 
-### Authorize 
-
-Authorize, is called by the module authority (default governance module account) or any account with `LEVEL_SUPER_ADMIN` to give permission to disable/enable messages to another account. There are three levels of permissions that can be granted. `LEVEL_SOME_MSGS` limits the number of messages that can be disabled. `LEVEL_ALL_MSGS` permits all messages to be disabled. `LEVEL_SUPER_ADMIN` allows an account to take all circuit breaker actions including authorizing and deauthorizing other accounts.
-
-```protobuf
-  // AuthorizeCircuitBreaker allows a super-admin to grant (or revoke) another
-  // account's circuit breaker permissions.
-  rpc AuthorizeCircuitBreaker(MsgAuthorizeCircuitBreaker) returns (MsgAuthorizeCircuitBreakerResponse);
+```bash
+RUST_LOG="[executor]=info" RISC0_DEV_MODE=1 cargo run
 ```
 
-### Trip
+### Running proofs remotely on Bonsai
 
-Trip, is called by an authorized account to disable message execution for a specific msgURL. If empty, all the msgs will be disabled.
+_Note: The Bonsai proving service is still in early Alpha; an API key is
+required for access. [Click here to request access][bonsai access]._
 
-```protobuf
-  // TripCircuitBreaker pauses processing of Msg's in the state machine.
-  rpc TripCircuitBreaker(MsgTripCircuitBreaker) returns (MsgTripCircuitBreakerResponse);
+If you have access to the URL and API key to Bonsai you can run your proofs
+remotely. To prove in Bonsai mode, invoke `cargo run` with two additional
+environment variables:
+
+```bash
+BONSAI_API_KEY="YOUR_API_KEY" BONSAI_API_URL="BONSAI_URL" cargo run
 ```
 
-### Reset
+## How to create a project based on this template
 
-Reset is called by an authorized account to enable execution for a specific msgURL of previously disabled message. If empty, all the disabled messages will be enabled.
+Search this template for the string `TODO`, and make the necessary changes to
+implement the required feature described by the `TODO` comment. Some of these
+changes will be complex, and so we have a number of instructional resources to
+assist you in learning how to write your own code for the RISC Zero zkVM:
 
-```protobuf
-  // ResetCircuitBreaker resumes processing of Msg's in the state machine that
-  // have been been paused using TripCircuitBreaker.
-  rpc ResetCircuitBreaker(MsgResetCircuitBreaker) returns (MsgResetCircuitBreakerResponse);
+- The [RISC Zero Developer Docs][dev-docs] is a great place to get started.
+- Example projects are available in the [examples folder][examples] of
+  [`risc0`][risc0-repo] repository.
+- Reference documentation is available at [https://docs.rs][docs.rs], including
+  [`risc0-zkvm`][risc0-zkvm], [`cargo-risczero`][cargo-risczero],
+  [`risc0-build`][risc0-build], and [others][crates].
+
+## Directory Structure
+
+It is possible to organize the files for these components in various ways.
+However, in this starter template we use a standard directory structure for zkVM
+applications, which we think is a good starting point for your applications.
+
+```text
+project_name
+├── Cargo.toml
+├── host
+│   ├── Cargo.toml
+│   └── src
+│       └── main.rs                        <-- [Host code goes here]
+└── methods
+    ├── Cargo.toml
+    ├── build.rs
+    ├── guest
+    │   ├── Cargo.toml
+    │   └── src
+    │       └── bin
+    │           └── method_name.rs         <-- [Guest code goes here]
+    └── src
+        └── lib.rs
 ```
 
-## Messages
+## Video Tutorial
 
-### MsgAuthorizeCircuitBreaker
+For a walk-through of how to build with this template, check out this [excerpt
+from our workshop at ZK HACK III][zkhack-iii].
 
-```protobuf reference
-https://github.com/cosmos/cosmos-sdk/blob/main/x/circuit/proto/cosmos/circuit/v1/tx.proto#L25-L40
-```
+## Questions, Feedback, and Collaborations
 
-This message is expected to fail if:
+We'd love to hear from you on [Discord][discord] or [Twitter][twitter].
 
-* the granter is not an account with permission level `LEVEL_SUPER_ADMIN` or the module authority
-
-### MsgTripCircuitBreaker
-
-```protobuf reference 
-https://github.com/cosmos/cosmos-sdk/blob/main/x/circuit/proto/cosmos/circuit/v1/tx.proto#L47-L60
-```
-
-This message is expected to fail if:
-
-* if the signer does not have a permission level with the ability to disable the specified type url message
-
-### MsgResetCircuitBreaker
-
-```protobuf reference
-https://github.com/cosmos/cosmos-sdk/blob/main/x/circuit/proto/cosmos/circuit/v1/tx.proto#L67-L78
-```
-
-This message is expected to fail if:
-
-* if the type url is not disabled
-
-## Events
-
-The circuit module emits the following events:
-
-### Message Events
-
-#### MsgAuthorizeCircuitBreaker
-
-| Type    | Attribute Key | Attribute Value           |
-|---------|---------------|---------------------------|
-| string  | granter       | {granterAddress}          |
-| string  | grantee       | {granteeAddress}          |
-| string  | permission    | {granteePermissions}      |
-| message | module        | circuit                   |
-| message | action        | authorize_circuit_breaker |
-
-#### MsgTripCircuitBreaker
-
-| Type     | Attribute Key | Attribute Value    |
-|----------|---------------|--------------------|
-| string   | authority     | {authorityAddress} |
-| []string | msg_urls      | []string{msg_urls} |
-| message  | module        | circuit            |
-| message  | action        | trip_circuit_breaker |
-
-#### ResetCircuitBreaker
-
-| Type     | Attribute Key | Attribute Value    |
-|----------|---------------|--------------------|
-| string   | authority     | {authorityAddress} |
-| []string | msg_urls      | []string{msg_urls} |
-| message  | module        | circuit            |
-| message  | action        | reset_circuit_breaker |
-
-
-## Keys
-
-* `AccountPermissionPrefix` - `0x01`
-* `DisableListPrefix` -  `0x02`
-
-## Client
-
-### CLI
-
-`x/circuit` module client provides the following CLI commands:
-
-```shell
-$ <appd> tx circuit
-Transactions commands for the circuit module
-
-Usage:
-  simd tx circuit [flags]
-  simd tx circuit [command]
-
-Available Commands:
-  authorize   Authorize an account to trip the circuit breaker.
-  disable     Disable a message from being executed
-  reset       Enable a message to be executed
-```
-
-```shell
-$ <appd> query circuit
-Querying commands for the circuit module
-
-Usage:
-  simd query circuit [flags]
-  simd query circuit [command]
-
-Available Commands:
-  account       Query a specific account's permissions
-  accounts      Query all account permissions
-  disabled-list Query a list of all disabled message types
-```
+[bonsai access]: https://bonsai.xyz/apply
+[cargo-risczero]: https://docs.rs/cargo-risczero
+[crates]: https://github.com/risc0/risc0/blob/main/README.md#rust-binaries
+[dev-docs]: https://dev.risczero.com
+[dev-mode]: https://dev.risczero.com/api/zkvm/dev-mode
+[discord]: https://discord.gg/risczero
+[docs.rs]: https://docs.rs/releases/search?query=risc0
+[examples]: https://github.com/risc0/risc0/tree/main/examples
+[risc0-build]: https://docs.rs/risc0-build
+[risc0-repo]: https://www.github.com/risc0/risc0
+[risc0-zkvm]: https://docs.rs/risc0-zkvm
+[rustup]: https://rustup.rs
+[rust-toolchain]: rust-toolchain.toml
+[twitter]: https://twitter.com/risczero
+[zkvm-overview]: https://dev.risczero.com/zkvm
+[zkhack-iii]: https://www.youtube.com/watch?v=Yg_BGqj_6lg&list=PLcPzhUaCxlCgig7ofeARMPwQ8vbuD6hC5&index=5
