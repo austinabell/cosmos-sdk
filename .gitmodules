@@ -1,4 +1,4 @@
 [submodule "x/circuit/tinygo"]
 	path = x/circuit/tinygo
 	url = https://github.com/risc0/tinygo.git
-	branch = austin/go21
+	branch = go21

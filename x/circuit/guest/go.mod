@@ -23,12 +23,12 @@ require (
 	google.golang.org/protobuf v1.33.0 // indirect
 )
 
-replace cosmossdk.io/core => ../../core
+replace cosmossdk.io/core => ../../../core
 
-replace cosmossdk.io/log => ../../log
+replace cosmossdk.io/log => ../../../log
 
-replace cosmossdk.io/collections => ../../collections
+replace cosmossdk.io/collections => ../../../collections
 
-replace cosmossdk.io/server/v2/stf => ../../server/v2/stf
+replace cosmossdk.io/server/v2/stf => ../../../server/v2/stf
 
-replace cosmossdk.io/errors => ../../errors
+replace cosmossdk.io/errors => ../../../errors

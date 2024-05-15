@@ -7,6 +7,8 @@ void sys_halt(uint8_t exit_code, uint32_t* initial_sha_state);
 void sys_write(uint32_t fd, uint8_t* byte_ptr, int len);
 void sys_sha_buffer(uint32_t* out_state, uint32_t* in_state, uint8_t* buf, uint32_t count);
 */
+import "C"
+
 import (
 	"context"
 	"encoding/binary"
