@@ -4,7 +4,7 @@ default: execute
 
 .PHONY: platform
 platform:
-	cargo +risc0 rustc -p zkvm-platform --target riscv32im-risc0-zkvm-elf --lib --crate-type staticlib --release --target-dir ./guest/out/platform
+	cargo +risc0 rustc -p zkvm-platform --target riscv32im-risc0-zkvm-elf --lib --crate-type staticlib --release --target-dir ./guest/app/out/platform
 
 .PHONY: tinygo-llvm
 tinygo-llvm:
