@@ -3,7 +3,7 @@ use std::fs;
 
 fn main() -> anyhow::Result<()> {
     // Load built tinygo program and compute it's image ID.
-    let consensus_elf = fs::read("./guest/out/main")?;
+    let consensus_elf = fs::read("./guest/app/out/main")?;
     let consensus_id = compute_image_id(&consensus_elf)?;
     // Initialize tracing. In order to view logs, run `RUST_LOG=info cargo run`
     tracing_subscriber::fmt()
