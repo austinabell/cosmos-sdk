@@ -14,7 +14,7 @@ fn main() -> anyhow::Result<()> {
     let prover = default_prover();
 
     // Produce a receipt by proving the specified ELF binary.
-    let receipt = prover.prove(env, &consensus_elf)?;
+    let receipt = prover.prove(env, &consensus_elf)?.receipt;
 
     assert_eq!(&receipt.journal.bytes, &[0, 1, 2, 3]);
 

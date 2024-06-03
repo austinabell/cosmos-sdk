@@ -20,7 +20,7 @@ tinygo: tinygo-llvm tinygo-rebuild
 .PHONY: guest
 guest: platform
     # Note: this will link against the risc0 platform static lib
-	cd ./guest/app; ../../tinygo/build/tinygo build -target=zkvm -o ../out/main ./main.go
+	cd ./guest/app; ../../tinygo/build/tinygo build -target=zkvm -o ./out/main ./main.go
 
 .PHONY: execute
 execute: guest
