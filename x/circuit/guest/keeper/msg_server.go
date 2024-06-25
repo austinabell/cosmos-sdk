@@ -3,10 +3,11 @@ package keeper
 import (
 	"bytes"
 	"context"
+	"errors"
 	"fmt"
 
 	"cosmossdk.io/collections"
-	errorsmod "cosmossdk.io/errors"
+	errorsmod "cosmossdk.io/errors/v2"
 	"cosmossdk.io/x/circuit/types"
 )
 
@@ -124,7 +125,7 @@ func (srv msgServer) ResetCircuitBreaker(ctx context.Context, msg *types.MsgRese
 
 	// Get the permissions for the account specified in the msg.Authority field
 	perms, err := keeper.Permissions.Get(ctx, address)
-	if err != nil && !errorsmod.IsOf(err, collections.ErrNotFound) {
+	if err != nil && !errors.Is(err, collections.ErrNotFound) {
 		return nil, err
 	}
 
