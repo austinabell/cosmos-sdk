@@ -17,21 +17,28 @@ void env_commit(struct sha256_state *hasher, const uint8_t *bytes_ptr, uint32_t 
 void env_exit(struct sha256_state *hasher, uint8_t exit_code);
 */
 import "C"
+import (
+	"context"
+	"time"
 
-// var app = deps.NewStf()
+	appmanager "cosmossdk.io/core/app"
+	"cosmossdk.io/x/circuit/app/deps"
+)
+
+var app = deps.NewStf()
 
 func main() {
-	// _, _, _ = app.DeliverBlock(context.Background(), &appmanager.BlockRequest[deps.Tx]{
-	// 	Height:            0,
-	// 	Time:              time.Time{},
-	// 	Hash:              nil,
-	// 	ChainId:           "",
-	// 	AppHash:           nil,
-	// 	Txs:               nil,
-	// 	ConsensusMessages: nil,
-	// },
-	// 	nil, // TODO: state
-	// )
+	_, _, _ = app.DeliverBlock(context.Background(), &appmanager.BlockRequest[deps.Tx]{
+		Height:            0,
+		Time:              time.Time{},
+		Hash:              nil,
+		ChainId:           "",
+		AppHash:           nil,
+		Txs:               nil,
+		ConsensusMessages: nil,
+	},
+		nil, // TODO: state
+	)
 
 	hasher := C.init_sha256()
 

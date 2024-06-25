@@ -3,10 +3,11 @@ package keeper
 import (
 	"bytes"
 	"context"
+	"errors"
 	"fmt"
 
 	"cosmossdk.io/collections"
-	errorsmod "cosmossdk.io/errors"
+	errorsmod "cosmossdk.io/errors/v2"
 	"cosmossdk.io/x/circuit/types"
 )
 
@@ -36,7 +37,7 @@ func (srv msgServer) AuthorizeCircuitBreaker(ctx context.Context, msg *types.Msg
 		// Check that the authorizer has the permission level of "super admin"
 		perms, err := srv.Permissions.Get(ctx, address)
 		if err != nil {
-			if errorsmod.IsOf(err, collections.ErrNotFound) {
+			if errors.Is(err, collections.ErrNotFound) {
 				return nil, errorsmod.Wrap(ErrUnauthorized, "only super admins can authorize users")
 			}
 
@@ -75,7 +76,7 @@ func (srv msgServer) TripCircuitBreaker(ctx context.Context, msg *types.MsgTripC
 
 	// Check that the account has the permissions
 	perms, err := srv.Permissions.Get(ctx, address)
-	if err != nil && !errorsmod.IsOf(err, collections.ErrNotFound) {
+	if err != nil && !errors.Is(err, collections.ErrNotFound) {
 		return nil, err
 	}
 
@@ -124,7 +125,7 @@ func (srv msgServer) ResetCircuitBreaker(ctx context.Context, msg *types.MsgRese
 
 	// Get the permissions for the account specified in the msg.Authority field
 	perms, err := keeper.Permissions.Get(ctx, address)
-	if err != nil && !errorsmod.IsOf(err, collections.ErrNotFound) {
+	if err != nil && !errors.Is(err, collections.ErrNotFound) {
 		return nil, err
 	}
 
