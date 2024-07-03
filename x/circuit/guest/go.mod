@@ -19,6 +19,8 @@ require (
 	google.golang.org/protobuf v1.33.0 // indirect
 )
 
+replace github.com/cosmos/gogoproto => github.com/cosmos/gogoproto v1.5.1-0.20240703095455-e660a2d380d8
+
 replace cosmossdk.io/core => ../../../core
 
 replace cosmossdk.io/log => ../../../log
